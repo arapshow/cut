@@ -39,6 +39,11 @@
   summary { cursor: pointer; text-align: center; }
   details p { line-height: 1.7; margin: 12px 0 0; }
 
+  .copy-btn {
+    font: inherit; font-size: 15px; font-weight: 700; color: #fff; background: var(--acc);
+    border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer;
+  }
+
   /* 로고: 글자 한 줄을 칼처럼 쭉 긋는 느낌 */
   .logo { text-decoration: none; color: var(--fg); text-align: center; margin-bottom: 40px; display: block; }
   /* CUT 글자를 대각선으로 두 조각 내서 살짝 벌려 놓음 */
@@ -182,7 +187,20 @@
       await navigator.clipboard.writeText(out);
       done.textContent = '한 칼에 끝. 깨끗한 주소 복사해놨어요. 카톡에 그대로 붙이세요.';
     } catch (e) {
-      done.textContent = '자동 복사가 막혔어요. 위 주소를 길게 눌러 복사하세요.';
+      // 자동 복사가 막히는 폰에서만 버튼을 보여줌
+      done.textContent = '';
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = '복사하기';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(out);
+          btn.textContent = '복사됐어요';
+        } catch (_) {
+          btn.textContent = '주소를 길게 눌러 복사하세요';
+        }
+      });
+      done.appendChild(btn);
     }
     done.classList.remove('pop'); void done.offsetWidth; done.classList.add('pop');
   }
