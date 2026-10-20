@@ -117,12 +117,16 @@
     box-shadow: 0 0 6px var(--acc), 0 0 18px var(--acc);
     transform: rotate(-32deg) scaleX(0); transform-origin: right center; opacity: 0;
   }
+  /* 칼선과 같은 자리·같은 기울기의 틀. 문구는 이 안에 들어가 칼선과 함께 움직임 */
+  .fx .track {
+    position: absolute; left: 50%; margin-left: -70%; top: 50%; width: 140%; height: 0;
+    transform: rotate(-32deg); transform-origin: right center;
+  }
   /* 메시지는 칼선과 같은 기울기(-32도)로, 칼이 그은 자리 위에 기울어 적힘 */
   .fx .msg {
-    /* 칼선 바로 위 왼쪽 빈 곳에, 칼선과 나란히 기울어 적힘(본문과 겹치지 않게) */
-    position: absolute; left: 12vw; top: 19vh; transform-origin: left center;
+    /* 칼선과 같은 틀(.track) 안에 있어서, 칼선 바로 위에 나란히 따라감 */
+    position: absolute; right: 30%; bottom: 4px;
     font-size: 18px; font-weight: 800; font-style: italic; color: var(--acc); opacity: 0; white-space: nowrap;
-    transform: rotate(-32deg);
   }
   /* 칼이 빠르게 긋고(0.18초), 자국은 5초쯤 흐리게 있다가 사라짐 */
   .fx.on .blade {
@@ -133,8 +137,8 @@
   @keyframes slash { 0% { opacity: 1; transform: rotate(-32deg) scaleX(0); } 100% { opacity: .35; transform: rotate(-32deg) scaleX(1); } }
   @keyframes msg {
     /* 메시지는 짧게 떴다 사라짐 (기울기 유지) */
-    0% { opacity: 0; transform: rotate(-32deg) scale(.96); } 5% { opacity: 1; transform: rotate(-32deg); }
-    85% { opacity: 1; transform: rotate(-32deg); } 100% { opacity: 0; transform: rotate(-32deg); }
+    0% { opacity: 0; } 5% { opacity: 1; }
+    85% { opacity: 1; } 100% { opacity: 0; }
   }
   #result.show { animation: rise .4s ease both; }
   #done.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
@@ -182,7 +186,7 @@
 <script type="module" src="https://arapshow.net/lib/inquiry.js?v=2"></script>
 <script type="module" src="https://arapshow.net/lib/visit.js?v=1"></script>
 
-<div class="fx" id="fx" aria-hidden="true"><div class="blade"></div><div class="msg">이미 넌 잘려있다</div></div>
+<div class="fx" id="fx" aria-hidden="true"><div class="blade"></div><div class="track"><div class="msg">이미 넌 잘려있다</div></div></div>
 
 <script>
   // 헤드카피: 방문할 때마다 하나를 무작위로 보여줌
