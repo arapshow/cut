@@ -87,17 +87,17 @@
   /* 붉은 줄: 왼쪽 밖에서 솻 날아와 주소 위 가운데 머물다가, 가던 방향(오른쪽)으로 잽싸게 빠져나감 */
   #before { position: relative; }
   /* 베인 상처: 붉은 줄이 지나간 뒤에도 원래 주소에 검은 줄이 남음 */
-  #before.go { text-decoration: line-through; text-decoration-color: var(--fg); text-decoration-thickness: 1.5px; }
+  #before.go { text-decoration: line-through; text-decoration-color: var(--fg); text-decoration-thickness: 1px; }
   #before.go::after {
     content: ""; position: absolute; left: 0; right: 0; top: 58%; height: 1.5px;
-    background: var(--acc); box-shadow: 0 0 6px var(--acc);
-    animation: flyline 1.95s linear .05s both;
+    background: var(--acc); will-change: transform, opacity;
+    animation: flyline 1.6s linear .04s both;
   }
   @keyframes flyline {
-    0% { transform: translateX(-130%) scaleX(2.4); filter: blur(5px); animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
-    11% { transform: translateX(0) scaleX(1); filter: blur(0); }
-    86% { transform: translateX(0) scaleX(1); filter: blur(0); animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
-    100% { transform: translateX(130%) scaleX(2.4); filter: blur(5px); }
+    0% { transform: translateX(-130%) scaleX(2.4); opacity: .0; animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
+    11% { transform: translateX(0) scaleX(1); opacity: 1; }
+    86% { transform: translateX(0) scaleX(1); opacity: 1; animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
+    100% { transform: translateX(130%) scaleX(2.4); opacity: 0; }
   }
   #done { margin-top: 6px; min-height: 0; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
   .copy-btn {
@@ -171,14 +171,14 @@
   /* 휴대폰(좁은 화면)은 칼선 옆 대신 맨 위에 띄움 */
   .fx .msg-top {
     display: block; position: absolute; top: 10px; left: 0; right: 0; margin: 0 auto; width: max-content;
-    font-size: 15px; font-weight: 800; font-style: normal; color: var(--acc); opacity: 1; transform: translateX(-70vw); white-space: nowrap;
+    font-size: 15px; font-weight: 800; font-style: normal; color: var(--acc); opacity: 0; transform: translateX(-70vw); white-space: nowrap; will-change: transform, opacity;
   }
-  .fx.on .msg-top { animation: flytext 1.95s linear .08s both; }
+  .fx.on .msg-top { animation: flytext 1.6s linear .24s both; }
   @keyframes flytext {
-    0% { transform: translateX(-110vw) skewX(48deg) scaleX(2.2); filter: blur(10px); animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
-    11% { transform: translateX(0) skewX(0) scaleX(1); filter: blur(0); }
-    86% { transform: translateX(0) skewX(0) scaleX(1); filter: blur(0); animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
-    100% { transform: translateX(110vw) skewX(48deg) scaleX(2.2); filter: blur(10px); }
+    0% { transform: translateX(-110vw) skewX(48deg) scaleX(2.2); opacity: .0; animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
+    11% { transform: translateX(0) skewX(0) scaleX(1); opacity: 1; }
+    86% { transform: translateX(0) skewX(0) scaleX(1); opacity: 1; animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
+    100% { transform: translateX(110vw) skewX(48deg) scaleX(2.2); opacity: 0; }
   }
   @media (max-width: 640px) {
     .fx .track { display: none; }
@@ -279,7 +279,11 @@
 
     const isYouTube = /(^|\.)youtu(\.be|be\.com)$/.test(u.hostname);
     const isGoogle = /(^|\.)google\.[a-z.]+$/.test(u.hostname);
+    // 구글 검색은 꼭 필요한 것만 남김(검색어 q, 탭 tbm·udm, 쪽 start, 언어 hl). 나머지는 기록 꼬리.
+    const GOOGLE_KEEP = /^(q|tbm|udm|start|hl)$/i;
+    const gSearch = isGoogle && u.pathname === '/search' && u.searchParams.has('q');
     [...u.searchParams.keys()].forEach(k => {
+      if (gSearch ? !GOOGLE_KEEP.test(k) : false) { u.searchParams.delete(k); return; }
       if (TRACK.some(r => r.test(k)) || (isYouTube && YT_TRACK.test(k)) || (isGoogle && GOOGLE_TRACK.test(k))) {
         u.searchParams.delete(k);
       }
@@ -333,8 +337,9 @@
     }
     fx.classList.remove('on'); void fx.offsetWidth; fx.classList.add('on');
     const bf = document.getElementById('before'); bf.classList.remove('go'); void bf.offsetWidth; bf.classList.add('go');
-    swoosh();
+    setTimeout(swoosh, 0);
   }
+  ['pointerdown', 'keydown', 'focusin'].forEach(ev => addEventListener(ev, function w() { removeEventListener(ev, w); try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {} }, { once: true }));
 
   const box = document.getElementById('box');
   const result = document.getElementById('result');
