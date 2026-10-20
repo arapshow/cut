@@ -112,14 +112,14 @@
   /* 화면 전체 위에 사선으로 긋고, 자국은 5초쯤 흐리게 있다가 사라짐 */
   .fx { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
   .fx .blade {
-    position: absolute; left: 50%; margin-left: -70%; top: 50%; width: 140%; height: 1.5px;
+    position: absolute; left: 50%; margin-left: -70%; top: 36%; width: 140%; height: 1.5px;
     background: linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent);
     box-shadow: 0 0 6px var(--acc), 0 0 18px var(--acc);
     transform: rotate(-32deg) scaleX(0); transform-origin: right center; opacity: 0;
   }
   /* 칼선과 같은 자리·같은 기울기의 틀. 문구는 이 안에 들어가 칼선과 함께 움직임 */
   .fx .track {
-    position: absolute; left: 50%; margin-left: -70%; top: 50%; width: 140%; height: 0;
+    position: absolute; left: 50%; margin-left: -70%; top: 36%; width: 140%; height: 0;
     transform: rotate(-32deg); transform-origin: right center;
   }
   /* 메시지는 칼선과 같은 기울기(-32도)로, 칼이 그은 자리 위에 기울어 적힘 */
