@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cut</title>
+<style>
+  :root { --bg:#fff; --fg:#111; --mut:#888; --acc:#ff5a3c; --line:#e2e2e2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#ff7a5f; --line:#333; }
+  }
+  :root[data-theme="light"] { --bg:#fff; --fg:#111; --mut:#888; --acc:#ff5a3c; --line:#e2e2e2; }
+  :root[data-theme="dark"]  { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#ff7a5f; --line:#333; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: clamp(22px, 5vw, 34px); line-height: 1.4; text-align: center;
+    word-break: keep-all; margin: 0 0 24px; max-width: 640px; min-height: 2.8em;
+  }
+  textarea {
+    width: 100%; max-width: 640px; height: 160px; padding: 16px;
+    font: inherit; font-size: 16px; color: var(--fg); background: transparent;
+    border: 2px solid var(--line); border-radius: 14px; resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: var(--acc); }
+  #result {
+    width: 100%; max-width: 640px; margin-top: 16px; min-height: 24px;
+    font-size: 15px; text-align: center; word-break: break-all; color: var(--fg);
+    user-select: all;
+  }
+  #done { margin-top: 8px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; }
+  details { width: 100%; max-width: 640px; margin-top: 48px; color: var(--mut); font-size: 14px; }
+  summary { cursor: pointer; text-align: center; }
+  details p { line-height: 1.7; margin: 12px 0 0; }
+
+  /* 로고: 글자 한 줄을 칼처럼 쭉 긋는 느낌 */
+  .logo { text-decoration: none; color: var(--fg); text-align: center; margin-bottom: 40px; display: block; }
+  /* CUT 글자를 대각선으로 두 조각 내서 살짝 벌려 놓음 */
+  .logo-name {
+    position: relative; display: inline-block; color: transparent;
+    font-size: 44px; font-weight: 900; letter-spacing: .32em; margin-right: -.32em; line-height: 1;
+  }
+  .logo-name::before, .logo-name::after {
+    content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--fg);
+    width: calc(100% - .32em); /* 뒤쪽 여백을 빼서 사선이 글자 한가운데를 지나게 */
+  }
+  /* 가로로 한 번 베어서 위와 아래가 살짝 어긋난 모양 */
+  .logo-name::before { clip-path: inset(0 0 50% 0); transform: translate(-1.5px, 0); }
+  .logo-name::after { clip-path: inset(50% 0 0 0); transform: translate(1.5px, 0); }
+  .logo-line {
+    display: block; width: 0; height: 3px; margin: 14px auto 0;
+    background: var(--acc); transition: width .6s cubic-bezier(.6, 0, .2, 1);
+  }
+  .logo:hover .logo-line { width: 100%; }
+  .logo-url { display: block; margin-top: 10px; font-size: 13px; color: var(--mut); letter-spacing: .02em; }
+
+  /* 정성 한 스푼: 부드럽게 나타나고, 입력칸이 살짝 반응하고, 복사 순간 톡 튐 */
+  h1, #result, #done { transition: opacity .35s ease, transform .35s ease; }
+  h1.swap { opacity: 0; transform: translateY(6px); }
+  textarea { transition: border-color .2s ease, box-shadow .2s ease; }
+  textarea:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 18%, transparent); }
+  #result.show { animation: rise .4s ease both; }
+  #done.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { 0% { transform: scale(.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .fx { display: none; } }
+
+  /* 붙여넣는 순간: 칼이 사선으로 긋고, 한 줄 선고가 떴다 사라짐 */
+  .fx { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+  .fx .blade {
+    position: absolute; left: -20%; top: 50%; width: 140%; height: 3px;
+    background: linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent);
+    box-shadow: 0 0 6px var(--acc), 0 0 18px var(--acc);
+    transform: rotate(-32deg) scaleX(0); transform-origin: left center; opacity: 0;
+  }
+  .fx .msg {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(20px, 4vw, 28px); font-weight: 800; color: var(--fg); opacity: 0; text-align: center;
+  }
+  .fx.on .blade { animation: slash .45s cubic-bezier(.6, 0, .2, 1) forwards; }
+  .fx.on .msg { animation: msg 1.6s ease forwards; }
+  @keyframes slash { 0% { opacity: 1; transform: rotate(-32deg) scaleX(0); } 100% { opacity: 1; transform: rotate(-32deg) scaleX(1); } }
+  @keyframes msg {
+    0% { opacity: 0; transform: scale(.96); } 15% { opacity: 1; transform: none; }
+    75% { opacity: 1; } 100% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<a class="logo" href="https://cut.arapshow.net" aria-label="cut 홈">
+  <span class="logo-name" data-t="CUT">CUT</span>
+  <span class="logo-line"></span>
+  <span class="logo-url">cut.arapshow.net</span>
+</a>
+
+<h1 id="head"></h1>
+
+<textarea id="box" placeholder="여기에 그 주소 통째로 던지세요. 쓸데없는 건 제가 다 잘라요." aria-label="긴 주소 붙여넣기"></textarea>
+<div id="result"></div>
+<div id="done"></div>
+
+<details>
+  <summary>이게 뭔데?</summary>
+  <p>
+    주소 뒤에 붙은 긴 꼬리는 "어디서 눌렀는지" 기록하려고 붙이는 표시입니다. 이 페이지는 그 꼬리를 떼고 깨끗한 주소만 남깁니다.<br>
+    한글 주소가 %로 뒤죽박죽 보이면 원래 글자로 바꿔 보여줍니다.<br>
+    입력한 주소는 어디에도 저장하지 않습니다. 모든 작업은 내 브라우저 안에서만 일어납니다.
+  </p>
+</details>
+
+<div class="fx" id="fx" aria-hidden="true"><div class="blade"></div><div class="msg">이미 넌 잘려있다</div></div>
+
+<script>
+  // 헤드카피: 방문할 때마다 하나를 무작위로 보여줌
+  const HEADS = [
+    "긴 주소 때문에 빡치셨죠? 여기에 때려박으세요. 댕강할게요.",
+    "주소가 왜 이렇게 길어? 짜증나는 거 다 떼어드림.",
+    "카톡에 주소 한 덩어리 던지는 사람, 이제 그만 봅시다. 댕강."
+  ];
+  document.getElementById('head').textContent = HEADS[Math.floor(Math.random() * HEADS.length)];
+
+  // 떼어낼 추적 꼬리 목록
+  const TRACK = [/^utm_/i, /^fbclid$/i, /^gclid$/i, /^igshid$/i, /^NaPm$/i, /^ncid$/i, /^mc_(eid|cid)$/i, /^spm$/i];
+  const YT_TRACK = /^si$/i;
+
+  function clean(raw) {
+    const m = raw.match(/https?:\/\/\S+/);
+    if (!m) return null;
+    let u;
+    try { u = new URL(m[0]); } catch (e) { return null; }
+
+    // 인스타·페이스북이 바깥에 씌운 포장 벗기기
+    if (/^l\.(facebook|instagram)\.com$/.test(u.hostname) && u.searchParams.get('u')) {
+      try { u = new URL(u.searchParams.get('u')); } catch (e) {}
+    }
+
+    const isYouTube = /(^|\.)youtu(\.be|be\.com)$/.test(u.hostname);
+    let changed = false;
+    [...u.searchParams.keys()].forEach(k => {
+      if (TRACK.some(r => r.test(k)) || (isYouTube && YT_TRACK.test(k))) {
+        u.searchParams.delete(k);
+        changed = true;
+      }
+    });
+
+    let out = u.toString();
+    if (changed && out.endsWith('?')) out = out.slice(0, -1);
+    // 한글 등을 읽을 수 있게 풀기 (&, ?, / 같은 기호는 그대로 둠)
+    try { out = decodeURI(out); } catch (e) {}
+    return out;
+  }
+
+  // 칼 한 번 긋기 효과 (붙여넣을 때만)
+  function slash() {
+    const fx = document.getElementById('fx');
+    fx.classList.remove('on'); void fx.offsetWidth; fx.classList.add('on');
+  }
+
+  const box = document.getElementById('box');
+  const result = document.getElementById('result');
+  const done = document.getElementById('done');
+
+  async function handle(text) {
+    const out = clean(text);
+    if (!out) {
+      result.textContent = '';
+      done.textContent = '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.';
+      return;
+    }
+    result.textContent = out;
+    result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
+    try {
+      await navigator.clipboard.writeText(out);
+      done.textContent = '한 칼에 끝. 깨끗한 주소 복사해놨어요. 카톡에 그대로 붙이세요.';
+    } catch (e) {
+      done.textContent = '자동 복사가 막혔어요. 위 주소를 길게 눌러 복사하세요.';
+    }
+    done.classList.remove('pop'); void done.offsetWidth; done.classList.add('pop');
+  }
+
+  // 붙여넣는 순간 바로 정리 + 복사
+  box.addEventListener('paste', e => {
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    e.preventDefault();
+    box.value = '';
+    slash();
+    handle(text);
+  });
+
+  // 직접 타이핑했을 때도 주소가 들어오면 처리
+  box.addEventListener('input', () => {
+    if (/https?:\/\//.test(box.value)) {
+      const text = box.value;
+      box.value = '';
+      handle(text);
+    }
+  });
+</script>
+</body>
+</html>
