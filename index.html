@@ -59,7 +59,7 @@
   #result {
     width: 100%; max-width: 720px; margin-top: 12px; min-height: 22px;
     font-size: 15px; text-align: left; color: var(--fg); user-select: all;
-    white-space: nowrap; overflow-x: auto; padding-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   #done { margin-top: 6px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
   .copy-btn {
@@ -230,7 +230,7 @@
     result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
     try {
       await navigator.clipboard.writeText(out);
-      done.textContent = '한 칼에 끝. 깨끗한 주소 복사해놨어요. 카톡에 그대로 붙이세요.';
+      done.textContent = '한 칼에 끝. 깨끗한 주소 복사완료. 어디든 붙여보세요.';
     } catch (e) {
       // 자동 복사가 막히는 폰에서만 버튼을 보여줌
       done.textContent = '';
