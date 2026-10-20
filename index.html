@@ -180,6 +180,8 @@
   // 떼어낼 추적 꼬리 목록
   const TRACK = [/^utm_/i, /^fbclid$/i, /^gclid$/i, /^igshid$/i, /^NaPm$/i, /^ncid$/i, /^mc_(eid|cid)$/i, /^spm$/i];
   const YT_TRACK = /^si$/i;
+  // 구글 검색 주소에 붙는 브라우저·검색 기록 꼬리(검색어 q는 남김)
+  const GOOGLE_TRACK = /^(rlz|oq|gs_lcrp|sourceid|source|ie|ei|ved|uact|sa|sclient)$/i;
 
   function clean(raw) {
     const m = raw.match(/https?:\/\/\S+/);
@@ -193,8 +195,9 @@
     }
 
     const isYouTube = /(^|\.)youtu(\.be|be\.com)$/.test(u.hostname);
+    const isGoogle = /(^|\.)google\.[a-z.]+$/.test(u.hostname);
     [...u.searchParams.keys()].forEach(k => {
-      if (TRACK.some(r => r.test(k)) || (isYouTube && YT_TRACK.test(k))) {
+      if (TRACK.some(r => r.test(k)) || (isYouTube && YT_TRACK.test(k)) || (isGoogle && GOOGLE_TRACK.test(k))) {
         u.searchParams.delete(k);
       }
     });
