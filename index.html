@@ -128,12 +128,12 @@
     animation: slash .18s cubic-bezier(.7, 0, 1, .6) forwards, fade-out .8s ease 5s forwards;
   }
   @keyframes fade-out { from { opacity: .35; } to { opacity: 0; } }
-  .fx.on .msg { animation: msg 1.6s ease forwards; }
+  .fx.on .msg { animation: msg 6.8s linear forwards; } /* 사선이 사라진 뒤 1초쯤 더 있다가 사라짐 */
   @keyframes slash { 0% { opacity: 1; transform: rotate(-32deg) scaleX(0); } 100% { opacity: .35; transform: rotate(-32deg) scaleX(1); } }
   @keyframes msg {
     /* 메시지는 짧게 떴다 사라짐 (기울기 유지) */
-    0% { opacity: 0; transform: rotate(-32deg) scale(.96); } 15% { opacity: 1; transform: rotate(-32deg); }
-    75% { opacity: 1; transform: rotate(-32deg); } 100% { opacity: 0; transform: rotate(-32deg); }
+    0% { opacity: 0; transform: rotate(-32deg) scale(.96); } 5% { opacity: 1; transform: rotate(-32deg); }
+    85% { opacity: 1; transform: rotate(-32deg); } 100% { opacity: 0; transform: rotate(-32deg); }
   }
   #result.show { animation: rise .4s ease both; }
   #done.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
