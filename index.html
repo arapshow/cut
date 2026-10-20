@@ -21,12 +21,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://cut.arapshow.net/og.png">
 <style>
-  :root { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; }
+  :root { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; --dash:#c9c9c9; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; --field:#2c2c31; }
+    :root { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; --dash:#4a4a4a; --field:#2c2c31; }
   }
-  :root[data-theme="light"] { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; }
-  :root[data-theme="dark"]  { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; --field:#2c2c31; }
+  :root[data-theme="light"] { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; --dash:#c9c9c9; }
+  :root[data-theme="dark"]  { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; --dash:#4a4a4a; --field:#2c2c31; }
 
   * { box-sizing: border-box; }
   body {
@@ -80,14 +80,29 @@
   }
   /* 붙여넣은 원래 주소: 흐리게, 가운데 줄 그어서 "이게 짧아졌구나" 보이게 */
   #before {
-    width: 100%; max-width: 720px; margin-top: 12px; font-size: 13px; color: var(--mut);
+    width: 100%; max-width: 720px; margin-top: 26px; font-size: 13px; color: var(--mut);
     text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-decoration: line-through; opacity: .75;
+    opacity: .75;
+  }
+  /* 붉은 줄: 왼쪽 밖에서 솻 날아와 주소 위 가운데 머물다가, 가던 방향(오른쪽)으로 잽싸게 빠져나감 */
+  #before { position: relative; }
+  /* 베인 상처: 붉은 줄이 지나간 뒤에도 원래 주소에 검은 줄이 남음 */
+  #before.go { text-decoration: line-through; text-decoration-color: var(--fg); text-decoration-thickness: 1.5px; }
+  #before.go::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 58%; height: 1.5px;
+    background: var(--acc); box-shadow: 0 0 6px var(--acc);
+    animation: flyline 1.95s linear .05s both;
+  }
+  @keyframes flyline {
+    0% { transform: translateX(-130%) scaleX(2.4); filter: blur(5px); animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
+    11% { transform: translateX(0) scaleX(1); filter: blur(0); }
+    86% { transform: translateX(0) scaleX(1); filter: blur(0); animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
+    100% { transform: translateX(130%) scaleX(2.4); filter: blur(5px); }
   }
   #done { margin-top: 6px; min-height: 0; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
   .copy-btn {
-    font: inherit; font-size: 15px; font-weight: 700; color: #fff; background: var(--acc);
-    border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer;
+    font: inherit; font-size: 13px; font-weight: 700; color: #fff; background: var(--acc);
+    border: 0; border-radius: 999px; padding: 6px 16px; cursor: pointer;
   }
 
   /* 이게 뭔데? — 얇은 카드 하나로 정리 */
@@ -100,7 +115,7 @@
   .about summary::after { content: "+"; margin-left: 6px; }
   .about[open] summary::after { content: "–"; }
   .about-body {
-    margin-top: 10px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px;
+    margin-top: 10px; padding: 16px 18px; border: 1.5px dashed var(--dash); border-radius: 14px;
     line-height: 1.7; text-align: left; color: var(--fg); word-break: keep-all; font-size: 13px;
   }
   .about-body p { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 10px; }
@@ -129,6 +144,7 @@
   /* 붙여넣는 순간: 칼이 사선으로 긋고, 한 줄 선고가 떴다 사라짐 */
   /* 화면 전체 위에 사선으로 긋고, 자국은 5초쯤 흐리게 있다가 사라짐 */
   .fx { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+  .fx .blade, .fx .track { display: none !important; }
   .fx .blade {
     position: absolute; left: 50%; margin-left: -70%; top: 36%; width: 140%; height: 1.5px;
     background: linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent);
@@ -154,10 +170,16 @@
   .fx.on .msg { animation: msg 3.5s linear .5s both; }
   /* 휴대폰(좁은 화면)은 칼선 옆 대신 맨 위에 띄움 */
   .fx .msg-top {
-    display: none; position: absolute; top: 10px; left: 0; right: 0; margin: 0 auto; width: max-content;
-    font-size: 15px; font-weight: 800; font-style: italic; color: var(--acc); opacity: 0; white-space: nowrap;
+    display: block; position: absolute; top: 10px; left: 0; right: 0; margin: 0 auto; width: max-content;
+    font-size: 15px; font-weight: 800; font-style: normal; color: var(--acc); opacity: 1; transform: translateX(-70vw); white-space: nowrap;
   }
-  .fx.on .msg-top { animation: msg 3.5s linear .5s both; }
+  .fx.on .msg-top { animation: flytext 1.95s linear .08s both; }
+  @keyframes flytext {
+    0% { transform: translateX(-110vw) skewX(48deg) scaleX(2.2); filter: blur(10px); animation-timing-function: cubic-bezier(.05, .8, .25, 1); }
+    11% { transform: translateX(0) skewX(0) scaleX(1); filter: blur(0); }
+    86% { transform: translateX(0) skewX(0) scaleX(1); filter: blur(0); animation-timing-function: cubic-bezier(.7, 0, 1, .55); }
+    100% { transform: translateX(110vw) skewX(48deg) scaleX(2.2); filter: blur(10px); }
+  }
   @media (max-width: 640px) {
     .fx .track { display: none; }
     .fx .msg-top { display: block; }
@@ -210,7 +232,7 @@
     <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg><span>한글 주소가 %로 깨져 보여서 황당할 때 있죠? CUT 만드는 김에 이것도 같이 해결했어요.</span></p>
     <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg><span>주소 뒤에 붙은 긴 파라미터 어쩌고, 인코딩이 어쩌고 설명은 머리 아프니 그냥 생략할게요.</span></p>
     <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span>복사하기도 귀찮아, 긴 주소 넣자마자 바로 복사됩니다. 자동 복사가 안 될 때만 복사 버튼이 나와요.</span></p>
-    <p class="about-note"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg><span>이런 스트레스로 어랍쇼가 만들어 버린 CUT.arapshow.net 필요하면 맘껏 쓰세요. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">랍쇼의 다른 유용한 툴은 TOOLS로</a></span></p>
+    <p class="about-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 12-8.4 8.4a1.4 1.4 0 0 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.9-1.9a2 2 0 0 1-.6-1.4V7l-2.3-2.3a6 6 0 0 0-4.2-1.8L9 3l.9.8A6.2 6.2 0 0 1 12 8.4V10l2 2h1.2a2 2 0 0 1 1.4.6l1.9 1.9"/></svg><span>이런 스트레스로 어랍쇼가 만들어 버린 CUT.arapshow.net 필요하면 맘껏 쓰세요. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">랍쇼의 다른 유용한 툴은 TOOLS로</a></span></p>
   </div>
 </details>
 
@@ -270,10 +292,48 @@
     return out;
   }
 
+  // 칼 스응 소리: 파일 없이 코드로 만든 짧은 소리, 음량 낮게(붙여넣을 때만)
+  let ac;
+  function swoosh() {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+      const t = ac.currentTime, len = 0.3;
+      // 칼날이 슥 지나가는 소리: 높이가 위로 올라가는 날카로운 바람소리(스응!)
+      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 3;
+      f.frequency.setValueAtTime(2200, t); f.frequency.exponentialRampToValueAtTime(9000, t + len * 0.8);
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + len * 0.55); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      src.connect(f); f.connect(g); g.connect(ac.destination); src.start(t); src.stop(t + len);
+      // 끝에 쇠가 스치는 가는 울림
+      [6300, 9100].forEach(hz => {
+        const o = ac.createOscillator(), og = ac.createGain(), s0 = t + len * 0.5;
+        o.type = 'sine'; o.frequency.value = hz;
+        og.gain.setValueAtTime(0.0001, s0); og.gain.exponentialRampToValueAtTime(0.008, s0 + 0.03); og.gain.exponentialRampToValueAtTime(0.0001, s0 + 0.28);
+        o.connect(og); og.connect(ac.destination); o.start(s0); o.stop(s0 + 0.3);
+      });
+    } catch (e) {}
+  }
+
   // 칼 한 번 긋기 효과 (붙여넣을 때만)
   function slash() {
     const fx = document.getElementById('fx');
+    // 칼선이 흐리게 남은 원래 긴 주소의 한가운데를 지나게 맞춤(칼선 오른쪽 끝을 기준으로 기울임)
+    const r = document.getElementById('before').getBoundingClientRect();
+    if (r.width) {
+      const W = innerWidth * 1.4, a = 32 * Math.PI / 180;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const left = cx + W / 2 * Math.cos(a) - W, top = cy - W / 2 * Math.sin(a);
+      fx.querySelectorAll('.blade, .track').forEach(el => { el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.width = W + 'px'; el.style.marginLeft = '0'; });
+      // 좁은 화면 문구는 아이콘을 피해 원래 주소 바로 위에
+      const mt = fx.querySelector('.msg-top'); mt.style.top = Math.max(8, r.top - 24) + 'px';
+    }
     fx.classList.remove('on'); void fx.offsetWidth; fx.classList.add('on');
+    const bf = document.getElementById('before'); bf.classList.remove('go'); void bf.offsetWidth; bf.classList.add('go');
+    swoosh();
   }
 
   const box = document.getElementById('box');
@@ -337,8 +397,8 @@
     const text = (e.clipboardData || window.clipboardData).getData('text');
     e.preventDefault();
     box.value = '';
-    slash();
     handle(text);
+    slash();
   });
 
   // 직접 타이핑했을 때도 주소가 들어오면 처리
