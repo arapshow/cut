@@ -358,8 +358,30 @@
   fitPlaceholder();
   addEventListener('resize', fitPlaceholder);
 
+  // 주소 종류: 'login'·'finance' 로그인·금융 주소라 도메인(서브도메인까지)만 복사 / 'cut' 꼬리를 자름 / 'short' 자를 게 없어 그대로
+  const RE_LOGIN_HOST = /^(login|signin|sign-in|logon|accounts?|auth|sso|id|oauth)\./i;
+  const RE_LOGIN_PATH = /\/(login|log-in|signin|sign-in|logon|oauth2?|authorize|sso|auth)(\/|$|\?)/i;
+  const RE_FIN_HOST = /(bank|card|securit|insurance|toss\.im|kakaopay|payco|paypal|stripe|pay\.|^pay|checkout)/i;
+  const RE_FIN_PATH = /\/(pay|payment|checkout|bank|banking|billing|order\/pay)(\/|$|\?)/i;
+  const RE_GOV_HOST = /(\.go\.kr|\.gov|gov\.kr|hometax|nhis\.or\.kr|nps\.or\.kr|kakaocert|passauth)/i;
+  const RE_AUTH_PATH = /\/(reset|reset-password|forgot|verify|verification|confirm|activate|invite|invitation|magic|unsubscribe|accept)(\/|-|_|$|\?)/i;
+  const RE_AUTH_KEY = /^(token|access_token|id_token|reset_token|verify|verification_code|invite|invite_code|magic|otp|auth_token)$/i;
+  function kind(text) {
+    const out = clean(text), m = text.match(/https?:\/\/\S+/);
+    if (!out || !m) return 'cut';
+    let u; try { u = new URL(m[0]); } catch (e) { return 'cut'; }
+    if (RE_AUTH_PATH.test(u.pathname + '/') || [...u.searchParams.keys()].some(k => RE_AUTH_KEY.test(k))) return 'auth';
+    if (RE_GOV_HOST.test(u.hostname)) return 'login';
+    if (RE_LOGIN_HOST.test(u.hostname) || RE_LOGIN_PATH.test(u.pathname + '/')) return 'login';
+    if (RE_FIN_HOST.test(u.hostname) || RE_FIN_PATH.test(u.pathname + '/')) return 'finance';
+    let o = m[0]; try { o = decodeURI(o); } catch (e) {}
+    return out === o ? 'short' : 'cut';
+  }
+
   async function handle(text) {
-    const out = clean(text);
+    const k = kind(text);
+    let out = clean(text);
+    if (out && (k === 'login' || k === 'finance' || k === 'auth')) out = new URL(out).origin;
     // 원래 주소를 흐리게 남겨서 얼마나 짧아졌는지 보이게
     before.textContent = (text.match(/https?:\/\/\S+/) || [''])[0];
     if (!out) {
@@ -371,7 +393,10 @@
     result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
     try {
       await navigator.clipboard.writeText(out);
-      done.textContent = '한 칼에 끝. 깨끗한 주소 복사완료. 어디든 붙여보세요.';
+      done.textContent = k === 'login' ? '로그인 페이지네요. 도메인만 복사했어요.'
+        : k === 'auth' ? '인증 링크네요. 도메인만 복사했어요.'
+        : k === 'finance' ? '금융관련 페이지네요. 도메인만 복사했어요.'
+        : '한 칼에 끝. 깨끗한 주소 복사완료. 어디든 붙여보세요.';
     } catch (e) {
       // 자동 복사가 막히는 폰에서만 버튼을 보여줌
       done.textContent = '';
@@ -403,7 +428,7 @@
     e.preventDefault();
     box.value = '';
     handle(text);
-    slash();
+    if (kind(text) !== 'short') slash();
   });
 
   // 직접 타이핑했을 때도 주소가 들어오면 처리
