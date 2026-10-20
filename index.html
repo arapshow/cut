@@ -143,8 +143,19 @@
   @media (max-width: 640px) {
     .fx .track { display: none; }
     .fx .msg-top { display: block; }
-    body { padding-top: 14px; } /* 휴대폰은 위 여백을 줄여 전체를 위로 */
-    .foot { padding-top: 16px; }
+    /* 휴대폰: "이게 뭔데?"를 펼쳐도 한 화면에 다 들어가도록 전체 높이를 줄임 */
+    body { padding-top: 10px; }
+    .logo { margin-bottom: 16px; }
+    .logo-name { font-size: 26px; }
+    .logo-line { margin-top: 8px; }
+    .logo-url { margin-top: 4px; }
+    h1 { margin-bottom: 14px; }
+    textarea { height: 84px; }
+    .about { margin-top: 26px; }
+    .about summary { padding: 4px; }
+    .about-body { font-size: 13px; line-height: 1.6; padding: 12px 14px; }
+    .about-body p { margin-bottom: 6px; }
+    .foot { padding-top: 10px; }
   } /* 사선보다 0.5초 늦게 나타나 3초 있다가 사라짐 */
   @keyframes slash { 0% { opacity: 1; transform: rotate(-32deg) scaleX(0); } 100% { opacity: .35; transform: rotate(-32deg) scaleX(1); } }
   @keyframes msg {
