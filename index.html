@@ -231,7 +231,7 @@
 <script>
   // 헤드카피: 방문할 때마다 하나를 무작위로 보여줌
   const HEADS = [
-    "긴 주소 때문에 빡치셨죠? 여기에 때려박으세요. 댕강할게요.",
+    "긴 주소 때문에 빡치죠? 여기에 때려박으세요. 댕강할게요.",
     "주소가 왜 이렇게 길어? 짜증나는 거 다 떼어드림.",
     "카톡에 주소 한 덩어리 던지는 사람, 이제 그만 봅시다. 댕강."
   ];
@@ -279,6 +279,18 @@
   const result = document.getElementById('result');
   const done = document.getElementById('done');
   const before = document.getElementById('before');
+
+  // 안내 문구: 한 줄에 들어가면 한 줄, 두 줄이 되면 "쓸데없는" 앞에서 끊기
+  const PH = ['여기에 그 주소 통째로 던지세요.', '쓸데없는 건 제가 다 잘라요.'];
+  function fitPlaceholder() {
+    const cs = getComputedStyle(box);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    const room = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    box.placeholder = ctx.measureText(PH.join(' ')).width <= room ? PH.join(' ') : PH.join('\n');
+  }
+  fitPlaceholder();
+  addEventListener('resize', fitPlaceholder);
 
   async function handle(text) {
     const out = clean(text);
