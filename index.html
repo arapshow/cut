@@ -100,6 +100,9 @@
     100% { transform: translateX(130%) scaleX(2.4); opacity: 0; }
   }
   #done { margin-top: 6px; min-height: 0; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
+  .langs { display: inline-flex; gap: 8px; }
+  .langs button { font: inherit; font-size: 12px; background: none; border: 0; padding: 0; color: var(--mut); opacity: .55; cursor: pointer; }
+  .langs button[aria-pressed="true"] { opacity: 1; font-weight: 700; }
   .copy-btn {
     font: inherit; font-size: 13px; font-weight: 700; color: #fff; background: var(--acc);
     border: 0; border-radius: 999px; padding: 6px 16px; cursor: pointer;
@@ -131,10 +134,18 @@
   /* 푸터: 공통 부품(Bros.Site · 응원 · 문의 · 공유 · by arapshow), 콘텐츠 폭 안에서 화면 아래에 붙음 */
   .foot {
     width: 100%; max-width: 720px; margin-top: auto; padding-top: 28px;
-    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 6px;
+    display: flex; flex-wrap: wrap; align-items: center; row-gap: 10px;
     font-size: 13px; color: var(--mut);
   }
-  .foot > * + *::before { content: "·"; margin: 0 8px; }
+  /* 공통부품은 왼쪽 끝, 언어는 가운데(좌우 여백 넉넉히), by는 오른쪽 끝 */
+  .foot-l { flex: 1; display: flex; flex-wrap: wrap; align-items: center; row-gap: 6px; }
+  .foot-l > * + *::before { content: "·"; margin: 0 8px; }
+  .foot-r { flex: 1; text-align: right; }
+  .foot .langs { padding: 0 28px; }
+  @media (max-width: 640px) {
+    .foot-l { flex: 1 1 100%; }
+    .foot .langs { padding: 0; }
+  }
   .foot button {
     all: unset; cursor: pointer; font: inherit; color: inherit; letter-spacing: inherit;
   }
@@ -226,22 +237,25 @@
 <div id="done" aria-live="polite"></div>
 
 <details class="about">
-  <summary>이게 뭔데?</summary>
+  <summary data-i18n="sum">이게 뭔데?</summary>
   <div class="about-body">
-    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg><span>북마크하거나 지인에게 공유할 때 주소가 너무 길어서 짜증나고, 어디를 잘라야 할지 어렵죠?</span></p>
-    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg><span>한글 주소가 %로 깨져 보여서 황당할 때 있죠? CUT 만드는 김에 이것도 같이 해결했어요.</span></p>
-    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg><span>주소 뒤에 붙은 긴 파라미터 어쩌고, 인코딩이 어쩌고 설명은 머리 아프니 그냥 생략할게요.</span></p>
-    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span>복사하기도 귀찮아, 긴 주소 넣자마자 바로 복사됩니다. 자동 복사가 안 될 때만 복사 버튼이 나와요.</span></p>
-    <p class="about-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 12-8.4 8.4a1.4 1.4 0 0 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.9-1.9a2 2 0 0 1-.6-1.4V7l-2.3-2.3a6 6 0 0 0-4.2-1.8L9 3l.9.8A6.2 6.2 0 0 1 12 8.4V10l2 2h1.2a2 2 0 0 1 1.4.6l1.9 1.9"/></svg><span>이런 스트레스로 어랍쇼가 만들어 버린 CUT.arapshow.net 필요하면 맘껏 쓰세요. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">랍쇼의 다른 유용한 툴은 TOOLS로</a></span></p>
+    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg><span data-i18n="p1">북마크하거나 지인에게 공유할 때 주소가 너무 길어서 짜증나고, 어디를 잘라야 할지 어렵죠?</span></p>
+    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg><span data-i18n="p2">한글 주소가 %로 깨져 보여서 황당할 때 있죠? CUT 만드는 김에 이것도 같이 해결했어요.</span></p>
+    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg><span data-i18n="p3">주소 뒤에 붙은 긴 파라미터 어쩌고, 인코딩이 어쩌고 설명은 머리 아프니 그냥 생략할게요.</span></p>
+    <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span data-i18n="p4">복사하기도 귀찮아, 긴 주소 넣자마자 바로 복사됩니다. 자동 복사가 안 될 때만 복사 버튼이 나와요.</span></p>
+    <p class="about-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 12-8.4 8.4a1.4 1.4 0 0 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.9-1.9a2 2 0 0 1-.6-1.4V7l-2.3-2.3a6 6 0 0 0-4.2-1.8L9 3l.9.8A6.2 6.2 0 0 1 12 8.4V10l2 2h1.2a2 2 0 0 1 1.4.6l1.9 1.9"/></svg><span data-i18n="note">이런 스트레스로 어랍쇼가 만들어 버린 CUT.arapshow.net 필요하면 맘껏 쓰세요. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">랍쇼의 다른 유용한 툴은 TOOLS로</a></span></p>
   </div>
 </details>
 
 <footer class="foot">
+  <div class="foot-l">
   <span data-arapshow-bros data-bros-look="inherit"></span>
-  <button type="button" data-arapshow-support>응원</button>
-  <button type="button" data-arapshow-inquiry="open">문의</button>
-  <button type="button" id="share">공유</button>
-  <a href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">coded by arapshow</a>
+  <button type="button" data-arapshow-support data-i18n="support">응원</button>
+  <button type="button" data-arapshow-inquiry="open" data-i18n="inquiry">문의</button>
+  <button type="button" id="share" data-i18n="share">공유</button>
+  </div>
+  <span class="langs" translate="no"><button type="button" data-lang="ko">KOR</button><button type="button" data-lang="en">ENG</button><button type="button" data-lang="ja">JPN</button></span>
+  <span class="foot-r"><a href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">coded by arapshow</a></span>
 </footer>
 
 <script type="module" src="https://arapshow.net/lib/bros.js?v=7"></script>
@@ -252,13 +266,70 @@
 <div class="fx" id="fx" aria-hidden="true"><div class="blade"></div><div class="track"><div class="msg">이미 넌 잘려있다</div></div><div class="msg-top">이미 넌 잘려있다</div></div>
 
 <script>
-  // 헤드카피: 방문할 때마다 하나를 무작위로 보여줌
-  const HEADS = [
-    "긴 주소 때문에 빡치죠? 여기에 때려박으세요. 댕강할게요.",
-    "주소가 왜 이렇게 길어? 짜증나는 거 다 떼어드림.",
-    "카톡에 주소 한 덩어리 던지는 사람, 이제 그만 봅시다. 댕강."
-  ];
-  document.getElementById('head').textContent = HEADS[Math.floor(Math.random() * HEADS.length)];
+  // 언어: 한국어·영어·일본어. 접속 언어로 자동 선택, 푸터 KOR·ENG·JPN으로 바꿈. "이미 넌 잘려있다"는 한국어 그대로.
+  const I18N = {
+    ko: {
+      title: 'CUT : 짜증나는 긴 주소를 깨끗하게!',
+      heads: ['긴 주소 때문에 빡치죠? 여기에 때려박으세요. 댕강할게요.', '주소가 왜 이렇게 길어? 짜증나는 거 다 떼어드림.', '카톡에 주소 한 덩어리 던지는 사람, 이제 그만 봅시다. 댕강.'],
+      ph: ['여기에 그 주소 통째로 던지세요.', '쓸데없는 건 제가 다 잘라요.'], aria: '긴 주소 붙여넣기',
+      sum: '이게 뭔데?',
+      p1: '북마크하거나 지인에게 공유할 때 주소가 너무 길어서 짜증나고, 어디를 잘라야 할지 어렵죠?',
+      p2: '한글 주소가 %로 깨져 보여서 황당할 때 있죠? CUT 만드는 김에 이것도 같이 해결했어요.',
+      p3: '주소 뒤에 붙은 긴 파라미터 어쩌고, 인코딩이 어쩌고 설명은 머리 아프니 그냥 생략할게요.',
+      p4: '복사하기도 귀찮아, 긴 주소 넣자마자 바로 복사됩니다. 자동 복사가 안 될 때만 복사 버튼이 나와요.',
+      note: '이런 스트레스로 어랍쇼가 만들어 버린 CUT.arapshow.net 필요하면 맘껏 쓰세요. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">랍쇼의 다른 유용한 툴은 TOOLS로</a>',
+      support: '응원', inquiry: '문의', share: '공유',
+      none: '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.',
+      ok: '한 칼에 끝. 깨끗한 주소 복사완료. 어디든 붙여보세요.',
+      login: '로그인 페이지네요. 도메인만 복사했어요.', finance: '금융관련 페이지네요. 도메인만 복사했어요.', auth: '인증 링크네요. 도메인만 복사했어요.',
+      copy: '복사하기', copied: '복사됐어요', longpress: '주소를 길게 눌러 복사하세요'
+    },
+    en: {
+      title: 'CUT : Clean up those annoyingly long links!',
+      heads: ['Sick of long links? Throw it in here. I\'ll chop it.', 'Why is this link so long? I\'ll strip all the annoying junk.', 'Stop dumping whole links into the chat. Chop.'],
+      ph: ['Throw the whole link in here.', 'I chop off all the junk.'], aria: 'Paste a long link',
+      sum: 'What is this?',
+      p1: 'When you bookmark or share a link, it\'s annoyingly long, and it\'s hard to know where to cut, right?',
+      p2: 'Korean links turning into %%% gibberish? I fixed that too while I was at it.',
+      p3: 'The long parameters, the encoding stuff... too much of a headache, so I\'ll skip the explanation.',
+      p4: 'Too lazy to even copy? It\'s copied the moment you paste. A copy button only shows up when auto-copy is blocked.',
+      note: 'CUT.arapshow.net, built out of this very stress. Use it as much as you like. <a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">More handy tools by arapshow: TOOLS</a>',
+      support: 'Support', inquiry: 'Contact', share: 'Share',
+      none: 'I can\'t see a link. Paste the whole link again.',
+      ok: 'Done in one cut. Clean link copied. Paste it anywhere.',
+      login: 'Looks like a login page. Copied the domain only.', finance: 'Looks like a finance page. Copied the domain only.', auth: 'Looks like a verification link. Copied the domain only.',
+      copy: 'Copy', copied: 'Copied', longpress: 'Long-press the link to copy'
+    },
+    ja: {
+      title: 'CUT : うざい長いURLをきれいに!',
+      heads: ['URLが長くてイラッとする? ここに丸ごとポイッ。スパッと切るよ。', 'なんでこんなに長いの? 邪魔なとこ、全部取っちゃうよ。', 'LINEにURLをドサッと投げる人、もう卒業しよう。スパッ。'],
+      ph: ['ここにURLを丸ごとポイッと。', 'いらないとこは全部切るよ。'], aria: '長いURLを貼り付け',
+      sum: 'これ何?',
+      p1: 'ブックマークや共有のとき、URLが長すぎてイラッとするし、どこを切ればいいか分からないですよね?',
+      p2: '韓国語のURLが%だらけで読めなくて困ったことありません? CUTのついでにこれも直しておきました。',
+      p3: 'URL末尾の長いパラメータとかエンコードとか、説明すると頭が痛くなるので省略します。',
+      p4: 'コピーも面倒? 貼り付けたらすぐコピーされます。自動コピーできないときだけコピーボタンが出ます。',
+      note: 'こんなストレスで作っちゃったCUT.arapshow.net、必要ならご自由にどうぞ。<a class="more" href="https://tools.arapshow.net" target="_blank" rel="noopener" translate="no">arapshowの他の便利ツールはTOOLSへ</a>',
+      support: '応援', inquiry: 'お問い合わせ', share: '共有',
+      none: 'URLが見えません。URL全体をもう一度貼ってみてください。',
+      ok: 'スパッと完了。きれいなURLをコピーしました。どこでも貼ってください。',
+      login: 'ログインページですね。ドメインだけコピーしました。', finance: '金融関連ページですね。ドメインだけコピーしました。', auth: '認証リンクですね。ドメインだけコピーしました。',
+      copy: 'コピー', copied: 'コピーしました', longpress: 'URLを長押ししてコピーしてください'
+    }
+  };
+  let LANG = 'ko';
+  try { LANG = localStorage.getItem('cutlang') || ''; } catch (e) {}
+  if (!I18N[LANG]) { const n = (navigator.language || 'ko').slice(0, 2); LANG = I18N[n] ? n : 'en'; }
+  const t = k => I18N[LANG][k];
+  function applyLang() {
+    document.documentElement.lang = LANG;
+    document.title = t('title');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+    document.getElementById('box').setAttribute('aria-label', t('aria'));
+    document.getElementById('head').textContent = t('heads')[Math.floor(Math.random() * 3)];
+    document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+    if (typeof fitPlaceholder === 'function') fitPlaceholder();
+  }
 
   // 떼어낼 추적 꼬리 목록
   const TRACK = [/^utm_/i, /^fbclid$/i, /^gclid$/i, /^igshid$/i, /^NaPm$/i, /^ncid$/i, /^mc_(eid|cid)$/i, /^spm$/i];
@@ -347,16 +418,21 @@
   const before = document.getElementById('before');
 
   // 안내 문구: 한 줄에 들어가면 한 줄, 두 줄이 되면 "쓸데없는" 앞에서 끊기
-  const PH = ['여기에 그 주소 통째로 던지세요.', '쓸데없는 건 제가 다 잘라요.'];
+  
   function fitPlaceholder() {
     const cs = getComputedStyle(box);
     const ctx = document.createElement('canvas').getContext('2d');
     ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     const room = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    box.placeholder = ctx.measureText(PH.join(' ')).width <= room ? PH.join(' ') : PH.join('\n');
+    const PH = t('ph'), sep = LANG === 'ja' ? '' : ' ';
+    box.placeholder = ctx.measureText(PH.join(sep)).width <= room ? PH.join(sep) : PH.join('\n');
   }
-  fitPlaceholder();
   addEventListener('resize', fitPlaceholder);
+  document.querySelectorAll('.langs button').forEach(b => b.addEventListener('click', () => {
+    LANG = b.dataset.lang; try { localStorage.setItem('cutlang', LANG); } catch (e) {}
+    applyLang();
+  }));
+  applyLang();
 
   // 주소 종류: 'login'·'finance' 로그인·금융 주소라 도메인(서브도메인까지)만 복사 / 'cut' 꼬리를 자름 / 'short' 자를 게 없어 그대로
   const RE_LOGIN_HOST = /^(login|signin|sign-in|logon|accounts?|auth|sso|id|oauth)\./i;
@@ -386,29 +462,26 @@
     before.textContent = (text.match(/https?:\/\/\S+/) || [''])[0];
     if (!out) {
       result.textContent = '';
-      done.textContent = '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.';
+      done.textContent = t('none');
       return;
     }
     result.textContent = out;
     result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
     try {
       await navigator.clipboard.writeText(out);
-      done.textContent = k === 'login' ? '로그인 페이지네요. 도메인만 복사했어요.'
-        : k === 'auth' ? '인증 링크네요. 도메인만 복사했어요.'
-        : k === 'finance' ? '금융관련 페이지네요. 도메인만 복사했어요.'
-        : '한 칼에 끝. 깨끗한 주소 복사완료. 어디든 붙여보세요.';
+      done.textContent = t(k === 'login' || k === 'auth' || k === 'finance' ? k : 'ok');
     } catch (e) {
       // 자동 복사가 막히는 폰에서만 버튼을 보여줌
       done.textContent = '';
       const btn = document.createElement('button');
       btn.className = 'copy-btn';
-      btn.textContent = '복사하기';
+      btn.textContent = t('copy');
       btn.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(out);
-          btn.textContent = '복사됐어요';
+          btn.textContent = t('copied');
         } catch (_) {
-          btn.textContent = '주소를 길게 눌러 복사하세요';
+          btn.textContent = t('longpress');
         }
       });
       done.appendChild(btn);
