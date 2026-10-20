@@ -57,7 +57,7 @@
   @media (min-width: 640px) { textarea { height: 140px; } }
 
   #result {
-    width: 100%; max-width: 720px; margin-top: 12px; min-height: 22px;
+    width: 100%; max-width: 720px; margin-top: 12px; min-height: 0;
     font-size: 15px; text-align: center; color: var(--fg); user-select: all;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -67,14 +67,14 @@
     text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     text-decoration: line-through; opacity: .75;
   }
-  #done { margin-top: 6px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
+  #done { margin-top: 6px; min-height: 0; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
   .copy-btn {
     font: inherit; font-size: 15px; font-weight: 700; color: #fff; background: var(--acc);
     border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer;
   }
 
   /* 이게 뭔데? — 얇은 카드 하나로 정리 */
-  .about { width: 100%; max-width: 720px; margin-top: 24px; font-size: 14px; color: var(--mut); }
+  .about { width: 100%; max-width: 720px; margin-top: 48px; font-size: 14px; color: var(--mut); }
   .about summary {
     list-style: none; cursor: pointer; text-align: center; padding: 6px;
     letter-spacing: .02em;
