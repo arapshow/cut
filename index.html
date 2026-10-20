@@ -49,6 +49,7 @@
   }
   .logo-name::before { clip-path: inset(0 0 50% 0); transform: translate(-1.5px, 0); }
   .logo-name::after { clip-path: inset(50% 0 0 0); transform: translate(1.5px, 0); }
+  .logo-icon { display: block; width: 96px; height: 96px; margin: 0 auto; }
   .logo-line {
     display: block; width: 0; height: 3px; margin: 12px auto 0;
     background: var(--acc); transition: width .6s cubic-bezier(.6, 0, .2, 1);
@@ -162,7 +163,7 @@
     /* 휴대폰: "이게 뭔데?"를 펼쳐도 한 화면에 다 들어가도록 전체 높이를 줄임 */
     body { padding-top: 22px; }
     .logo { margin-bottom: 16px; }
-    .logo-name { font-size: 34px; }
+    .logo-icon { width: 76px; height: 76px; }
     .logo-line { margin-top: 8px; }
     .logo-url { margin-top: 4px; }
     h1 { margin-bottom: 14px; }
@@ -189,7 +190,7 @@
 <body>
 
 <a class="logo" href="https://cut.arapshow.net" aria-label="cut 홈">
-  <span class="logo-name" data-t="CUT">CUT</span>
+  <img class="logo-icon" src="icon-512.png" width="96" height="96" alt="CUT">
   <span class="logo-line"></span>
   <span class="logo-url">cut.arapshow.net</span>
 </a>
