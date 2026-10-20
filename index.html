@@ -61,6 +61,12 @@
     font-size: 15px; text-align: center; color: var(--fg); user-select: all;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  /* 붙여넣은 원래 주소: 흐리게, 가운데 줄 그어서 "이게 짧아졌구나" 보이게 */
+  #before {
+    width: 100%; max-width: 720px; margin-top: 12px; font-size: 13px; color: var(--mut);
+    text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-decoration: line-through; opacity: .75;
+  }
   #done { margin-top: 6px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
   .copy-btn {
     font: inherit; font-size: 15px; font-weight: 700; color: #fff; background: var(--acc);
@@ -139,6 +145,7 @@
 <h1 id="head"></h1>
 
 <textarea id="box" placeholder="여기에 그 주소 통째로 던지세요. 쓸데없는 건 제가 다 잘라요." aria-label="긴 주소 붙여넣기"></textarea>
+<div id="before"></div>
 <div id="result"></div>
 <div id="done"></div>
 
@@ -218,9 +225,12 @@
   const box = document.getElementById('box');
   const result = document.getElementById('result');
   const done = document.getElementById('done');
+  const before = document.getElementById('before');
 
   async function handle(text) {
     const out = clean(text);
+    // 원래 주소를 흐리게 남겨서 얼마나 짧아졌는지 보이게
+    before.textContent = (text.match(/https?:\/\/\S+/) || [''])[0];
     if (!out) {
       result.textContent = '';
       done.textContent = '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.';
