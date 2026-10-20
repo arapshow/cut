@@ -109,17 +109,19 @@
   .foot a { color: inherit; text-decoration: none; }
 
   /* 붙여넣는 순간: 칼이 사선으로 긋고, 한 줄 선고가 떴다 사라짐 */
-  /* 맨 윗줄 띠에서만 칼이 긋고, 그 자국은 흐리게 남음(본문 글자와 안 겹치게) */
-  .fx { position: fixed; top: 0; left: 0; right: 0; height: 44px; pointer-events: none; overflow: hidden; z-index: 10; }
+  /* 화면 전체 위에 사선으로 긋고, 자국은 5초쯤 흐리게 있다가 사라짐 */
+  .fx { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
   .fx .blade {
     position: absolute; left: -20%; top: 50%; width: 140%; height: 1.5px;
     background: linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent);
     box-shadow: 0 0 6px var(--acc), 0 0 18px var(--acc);
     transform: rotate(-32deg) scaleX(0); transform-origin: left center; opacity: 0;
   }
+  /* 메시지는 맨 위 가운데 알약 모양, 본문 글자와 안 겹치게 */
   .fx .msg {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800; color: var(--acc); opacity: 0; text-align: center;
+    position: absolute; top: 14px; left: 0; right: 0; margin: 0 auto; width: max-content;
+    padding: 7px 16px; border-radius: 999px; background: var(--bg); box-shadow: 0 0 0 1px var(--line);
+    font-size: 14px; font-weight: 800; color: var(--acc); opacity: 0; white-space: nowrap;
   }
   /* 칼이 빠르게 긋고(0.18초), 자국은 5초쯤 흐리게 있다가 사라짐 */
   .fx.on .blade {
