@@ -117,11 +117,11 @@
     box-shadow: 0 0 6px var(--acc), 0 0 18px var(--acc);
     transform: rotate(-32deg) scaleX(0); transform-origin: left center; opacity: 0;
   }
-  /* 메시지는 맨 위 가운데 알약 모양, 본문 글자와 안 겹치게 */
+  /* 메시지는 칼선과 같은 기울기(-32도)로, 칼이 그은 자리 위에 기울어 적힘 */
   .fx .msg {
-    position: absolute; top: 14px; left: 0; right: 0; margin: 0 auto; width: max-content;
-    padding: 7px 16px; border-radius: 999px; background: var(--bg); box-shadow: 0 0 0 1px var(--line);
-    font-size: 14px; font-weight: 800; color: var(--acc); opacity: 0; white-space: nowrap;
+    position: absolute; top: calc(50% - 16px); left: 0; right: 0; margin: 0 auto; width: max-content;
+    font-size: 18px; font-weight: 800; font-style: italic; color: var(--acc); opacity: 0; white-space: nowrap;
+    transform: rotate(-32deg);
   }
   /* 칼이 빠르게 긋고(0.18초), 자국은 5초쯤 흐리게 있다가 사라짐 */
   .fx.on .blade {
@@ -131,9 +131,9 @@
   .fx.on .msg { animation: msg 1.6s ease forwards; }
   @keyframes slash { 0% { opacity: 1; transform: rotate(-32deg) scaleX(0); } 100% { opacity: .35; transform: rotate(-32deg) scaleX(1); } }
   @keyframes msg {
-    /* 메시지는 짧게 떴다 사라짐 */
-    0% { opacity: 0; transform: scale(.96); } 15% { opacity: 1; transform: none; }
-    75% { opacity: 1; } 100% { opacity: 0; }
+    /* 메시지는 짧게 떴다 사라짐 (기울기 유지) */
+    0% { opacity: 0; transform: rotate(-32deg) scale(.96); } 15% { opacity: 1; transform: rotate(-32deg); }
+    75% { opacity: 1; transform: rotate(-32deg); } 100% { opacity: 0; transform: rotate(-32deg); }
   }
   #result.show { animation: rise .4s ease both; }
   #done.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1) both; }
