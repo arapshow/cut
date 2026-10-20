@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>cut</title>
 <style>
-  :root { --bg:#fff; --fg:#111; --mut:#888; --acc:#ff5a3c; --line:#e2e2e2; }
+  :root { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#ff7a5f; --line:#333; }
+    :root { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; }
   }
-  :root[data-theme="light"] { --bg:#fff; --fg:#111; --mut:#888; --acc:#ff5a3c; --line:#e2e2e2; }
-  :root[data-theme="dark"]  { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#ff7a5f; --line:#333; }
+  :root[data-theme="light"] { --bg:#fff; --fg:#111; --mut:#888; --acc:#b5483b; --line:#e2e2e2; }
+  :root[data-theme="dark"]  { --bg:#111; --fg:#f2f2f2; --mut:#999; --acc:#d9766a; --line:#333; }
 
   * { box-sizing: border-box; }
   body {
@@ -58,7 +58,7 @@
 
   #result {
     width: 100%; max-width: 720px; margin-top: 12px; min-height: 22px;
-    font-size: 15px; text-align: left; color: var(--fg); user-select: all;
+    font-size: 15px; text-align: center; color: var(--fg); user-select: all;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   #done { margin-top: 6px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; font-size: 15px; }
