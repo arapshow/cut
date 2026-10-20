@@ -31,8 +31,8 @@
   textarea:focus { outline: none; border-color: var(--acc); }
   #result {
     width: 100%; max-width: 640px; margin-top: 16px; min-height: 24px;
-    font-size: 15px; text-align: center; word-break: break-all; color: var(--fg);
-    user-select: all;
+    font-size: 15px; text-align: left; color: var(--fg); user-select: all;
+    white-space: nowrap; overflow-x: auto; padding-bottom: 4px;
   }
   #done { margin-top: 8px; min-height: 24px; font-weight: 700; color: var(--acc); text-align: center; }
   details { width: 100%; max-width: 640px; margin-top: 48px; color: var(--mut); font-size: 14px; }
@@ -151,7 +151,7 @@
     });
 
     let out = u.toString();
-    if (changed && out.endsWith('?')) out = out.slice(0, -1);
+    if (out.endsWith('?')) out = out.slice(0, -1);
     // 한글 등을 읽을 수 있게 풀기 (&, ?, / 같은 기호는 그대로 둠)
     try { out = decodeURI(out); } catch (e) {}
     return out;
