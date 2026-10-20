@@ -119,8 +119,8 @@
   }
   /* 메시지는 칼선과 같은 기울기(-32도)로, 칼이 그은 자리 위에 기울어 적힘 */
   .fx .msg {
-    /* 칼선 바로 아래에 나란히 붙어 흐르게(겹치지 않게). 칼선이 화면 가운데를 지나므로 왼쪽 아래 빈 곳에 놓음 */
-    position: absolute; left: 8%; top: calc(50% + 26.25vw + 16px); transform-origin: left center;
+    /* 칼선 바로 위 왼쪽 빈 곳에, 칼선과 나란히 기울어 적힘(본문과 겹치지 않게) */
+    position: absolute; left: 12vw; top: 19vh; transform-origin: left center;
     font-size: 18px; font-weight: 800; font-style: italic; color: var(--acc); opacity: 0; white-space: nowrap;
     transform: rotate(-32deg);
   }
