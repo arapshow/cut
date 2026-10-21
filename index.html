@@ -332,11 +332,39 @@
     if (typeof fitPlaceholder === 'function') fitPlaceholder();
   }
 
-  // 떼어낼 추적 꼬리 목록
-  const TRACK = [/^utm_/i, /^fbclid$/i, /^gclid$/i, /^igshid$/i, /^NaPm$/i, /^ncid$/i, /^mc_(eid|cid)$/i, /^spm$/i];
-  const YT_TRACK = /^si$/i;
-  // 구글 검색 주소에 붙는 브라우저·검색 기록 꼬리(검색어 q는 남김)
-  const GOOGLE_TRACK = /^(rlz|oq|gs_lcrp|sourceid|source|ie|ei|ved|uact|sa|sclient)$/i;
+  // 떼어낼 추적 꼬리: 어느 사이트든 지우는 것
+  const TRACK = [
+    /^utm_/i, /^fbclid$/i, /^gclid$/i, /^gclsrc$/i, /^gbraid$/i, /^wbraid$/i, /^dclid$/i, /^gad_/i, /^_ga/i, /^_gl$/i,
+    /^msclkid$/i, /^ttclid$/i, /^twclid$/i, /^yclid$/i, /^li_fat_id$/i, /^igshid$/i, /^igsh$/i, /^mdxt$/i, /^mibextid$/i,
+    /^ref_src$/i, /^ref_url$/i, /^mc_(eid|cid)$/i, /^_hsenc$/i, /^_hsmi$/i, /^mkt_tok$/i, /^vero_id$/i,
+    /^NaPm$/i, /^ncid$/i, /^spm$/i, /^scm$/i, /^share_id$/i, /^sharer_id$/i
+  ];
+  // 사이트별로 더 지우는 것: 주소 앞부분(도메인) → 지울 이름들. ALL이면 물음표 뒤를 통째로 뗌.
+  const SITE_RULES = [
+    [/(^|\.)instagram\.com$/, 'ALL'],
+    [/(^|\.)threads\.(net|com)$/, 'ALL'],
+    [/(^|\.)tiktok\.com$/, 'ALL'],
+    [/(^|\.)pinterest\.[a-z.]+$|^pin\.it$/, 'ALL'],
+    [/(^|\.)linkedin\.com$/, 'ALL'],
+    [/(^|\.)spotify\.com$/, 'ALL'],
+    [/(^|\.)(facebook|fb)\.com$|^fb\.watch$/, /^(__cft__.*|__tn__|sfnsn|rdid|share_url|_rdr|ref|eid|comment_tracking|notif_id|notif_t|hc_ref|refsrc|fref|paipv|mf_story_key)$/i],
+    [/(^|\.)(twitter|x)\.com$/, /^(s|t|src|ref)$/i],
+    [/(^|\.)youtu(\.be|be\.com)$/, /^(si|feature|pp|ab_channel|embeds_referring_euri)$/i],
+    [/(^|\.)reddit\.com$/, /^(ref|ref_source|rdt|\$deep_link|correlation_id|post_index|context|utm_.*)$/i],
+    [/(^|\.)twitch\.tv$/, /^(sr|tt_medium|tt_content)$/i],
+    [/(^|\.)medium\.com$/, /^(source|sk)$/i],
+    [/(^|\.)substack\.com$/, /^(r|triedRedirect|publication_id)$/i],
+    [/(^|\.)notion\.(so|site)$/, /^(pvs|source)$/i],
+    [/(^|\.)(docs|drive|forms|sheets|slides)\.google\.com$/, /^(usp|ouid|rtpof|sd)$/i],
+    [/(^|\.)google\.[a-z.]+$/, /^(rlz|oq|gs_lcrp|sourceid|source|ie|ei|ved|uact|sa|sclient|entry|g_ep|skid|ucbcb|shorturl|biw|bih|dpr)$/i],
+    [/(^|\.)netflix\.com$/, /^(trackId|tctx|vlang|jbv)$/i],
+    [/(^|\.)amazon\.[a-z.]+$|^amzn\.[a-z]+$/, /^(ref|ref_|pf_rd_.*|pd_rd_.*|qid|sr|keywords|crid|sprefix|th|psc|tag|linkCode|linkId|content-id|_encoding|dib|dib_tag|smid|spLa|aref)$/i],
+    [/(^|\.)coupang\.com$/, /^(src|spec|addtag|ctag|lptag|itime|pageType|pageValue|wPcid|wRef|wTime|redirect|traceid|sourceType|searchId|rank|isAddedCart|clickEventId|korePlacement|koreSubPlacement|landingType)$/i],
+    [/(^|\.)naver\.com$/, /^(fromRss|trackingCode|NaPm|ctr|ssc)$/i],
+    [/(^|\.)(kakao\.com|daum\.net)$/, /^(rcv|srcid|referrer|from)$/i]
+  ];
+  // 구글 검색은 꼭 필요한 것만 남김(검색어 q, 탭 tbm·udm, 쪽 start, 언어 hl). 나머지는 기록 꼬리.
+  const GOOGLE_KEEP = /^(q|tbm|udm|start|hl)$/i;
 
   function clean(raw) {
     const m = raw.match(/https?:\/\/\S+/);
@@ -349,16 +377,15 @@
       try { u = new URL(u.searchParams.get('u')); } catch (e) {}
     }
 
-    const isYouTube = /(^|\.)youtu(\.be|be\.com)$/.test(u.hostname);
     const isGoogle = /(^|\.)google\.[a-z.]+$/.test(u.hostname);
-    // 구글 검색은 꼭 필요한 것만 남김(검색어 q, 탭 tbm·udm, 쪽 start, 언어 hl). 나머지는 기록 꼬리.
-    const GOOGLE_KEEP = /^(q|tbm|udm|start|hl)$/i;
     const gSearch = isGoogle && u.pathname === '/search' && u.searchParams.has('q');
+    const rules = SITE_RULES.filter(([host]) => host.test(u.hostname)).map(r => r[1]);
+    if (rules.includes('ALL')) u.search = '';
+    // 아마존 주소 끝의 /ref=... 꼬리도 뗌
+    if (/(^|\.)amazon\.[a-z.]+$/.test(u.hostname)) u.pathname = u.pathname.replace(/\/ref=[^/]*$/, '');
     [...u.searchParams.keys()].forEach(k => {
-      if (gSearch ? !GOOGLE_KEEP.test(k) : false) { u.searchParams.delete(k); return; }
-      if (TRACK.some(r => r.test(k)) || (isYouTube && YT_TRACK.test(k)) || (isGoogle && GOOGLE_TRACK.test(k))) {
-        u.searchParams.delete(k);
-      }
+      const drop = TRACK.some(r => r.test(k)) || rules.some(r => r !== 'ALL' && r.test(k)) || (gSearch && !GOOGLE_KEEP.test(k));
+      if (drop) u.searchParams.delete(k);
     });
 
     let out = u.toString();
