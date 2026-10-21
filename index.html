@@ -62,6 +62,8 @@
     font-size: clamp(13px, 3.4vw, 24px); line-height: 1.4; text-align: center;
     white-space: nowrap; margin: 0 0 20px; max-width: 100%; min-height: 1.4em;
   }
+  /* 일본어·영어 헤드카피는 길어서 넘치면 다음 줄로 */
+  html:not([lang="ko"]) h1 { white-space: normal; text-wrap: balance; }
 
   /* 입력칸: 폰에서도 한 화면에 들어오도록 낮게 */
   textarea {
@@ -318,6 +320,7 @@
       copy: 'コピー', copied: 'コピーしました', longpress: 'URLを長押ししてコピーしてください'
     }
   };
+  let lastDone = null; // 마지막 결과 안내(언어를 바꾸면 그 언어로 다시 씀)
   let LANG = 'ko';
   try { LANG = localStorage.getItem('cutlang') || ''; } catch (e) {}
   if (!I18N[LANG]) { const n = (navigator.language || 'ko').slice(0, 2); LANG = I18N[n] ? n : 'en'; }
@@ -330,6 +333,7 @@
     document.getElementById('head').textContent = t('heads')[Math.floor(Math.random() * 3)];
     document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
     if (typeof fitPlaceholder === 'function') fitPlaceholder();
+    paintDone();
   }
 
   // 떼어낼 추적 꼬리: 어느 사이트든 지우는 것
@@ -489,6 +493,12 @@
     a.textContent = t('ok')[1];
     return a;
   }
+  function paintDone() {
+    if (!lastDone) return;
+    if (lastDone.none) done.textContent = t('none');
+    else if (lastDone.k === 'login' || lastDone.k === 'auth' || lastDone.k === 'finance') done.textContent = t(lastDone.k);
+    else setOk(lastDone.out);
+  }
   function setOk(url) {
     const [a, , c] = t('ok');
     done.textContent = '';
@@ -506,6 +516,7 @@
     before.textContent = (text.match(/https?:\/\/\S+/) || [''])[0];
     if (!out) {
       result.textContent = '';
+      lastDone = { none: true };
       done.textContent = t('none');
       return;
     }
@@ -513,10 +524,11 @@
     result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
     try {
       await navigator.clipboard.writeText(out);
-      if (k === 'login' || k === 'auth' || k === 'finance') done.textContent = t(k);
-      else setOk(out);
+      lastDone = { k, out };
+      paintDone();
     } catch (e) {
       // 자동 복사가 막히는 폰에서만 버튼을 보여줌
+      lastDone = null;
       done.textContent = '';
       const btn = document.createElement('button');
       btn.className = 'copy-btn';
