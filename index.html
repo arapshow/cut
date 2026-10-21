@@ -305,7 +305,7 @@
       none: '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.',
       ok: ['깨끗한 주소, 이미 복사완료. 어디든 붙여넣거나, ', '새창으로 여세요', '.'],
       login: '로그인 페이지네요. 도메인만 복사했어요.', finance: '금융관련 페이지네요. 도메인만 복사했어요.', auth: '인증 링크네요. 도메인만 복사했어요.',
-      hist: '최근 자른 주소', clear: '지우기', again: '다시 복사',
+      retry: '잘리지 않았네요? 다시 시도해 볼게요.', hist: '최근 자른 주소', clear: '지우기', again: '다시 복사',
       copy: '복사하기', copied: '복사됐어요', longpress: '주소를 길게 눌러 복사하세요'
     },
     en: {
@@ -322,7 +322,7 @@
       none: 'I can\'t see a link. Paste the whole link again.',
       ok: ['Clean link, already copied. Paste it anywhere, or ', 'open it in a new window', '.'],
       login: 'Looks like a login page. Copied the domain only.', finance: 'Looks like a finance page. Copied the domain only.', auth: 'Looks like a verification link. Copied the domain only.',
-      hist: 'Recently cut', clear: 'Clear', again: 'Copy again',
+      retry: 'Not fully cut? Let me try again.', hist: 'Recently cut', clear: 'Clear', again: 'Copy again',
       copy: 'Copy', copied: 'Copied', longpress: 'Long-press the link to copy'
     },
     ja: {
@@ -339,7 +339,7 @@
       none: 'URLが見えません。URL全体をもう一度貼ってみてください。',
       ok: ['きれいなURLはもうコピーしました。どこでも貼るか、', '新しいウィンドウで開いてください', '。'],
       login: 'ログインページですね。ドメインだけコピーしました。', finance: '金融関連ページですね。ドメインだけコピーしました。', auth: '認証リンクですね。ドメインだけコピーしました。',
-      hist: '最近切ったURL', clear: '消去', again: 'もう一度コピー',
+      retry: 'まだ切れてないですね? もう一度やってみます。', hist: '最近切ったURL', clear: '消去', again: 'もう一度コピー',
       copy: 'コピー', copied: 'コピーしました', longpress: 'URLを長押ししてコピーしてください'
     }
   };
@@ -521,7 +521,7 @@
     if (!lastDone) return;
     if (lastDone.none) done.textContent = t('none');
     else if (lastDone.k === 'login' || lastDone.k === 'auth' || lastDone.k === 'finance') done.textContent = t(lastDone.k);
-    else setOk(lastDone.out);
+    else { setOk(lastDone.out); if (lastDone.retried) done.prepend(t('retry') + ' '); }
   }
   function setOk(url) {
     const [a, , c] = t('ok');
@@ -537,7 +537,7 @@
   const hist = document.getElementById('hist'), histList = document.getElementById('hist-list');
   function loadHist() { try { const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); return Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, HIST_MAX) : []; } catch (e) { return []; } }
   function saveHist(a) { try { localStorage.setItem(HIST_KEY, JSON.stringify(a)); } catch (e) {} }
-  function addHist(url) { saveHist([url, ...loadHist().filter(x => x !== url)].slice(0, HIST_MAX)); paintHist(); }
+  function addHist(url, old) { saveHist([url, ...loadHist().filter(x => x !== url && x !== old)].slice(0, HIST_MAX)); paintHist(); }
   function paintHist() {
     const a = loadHist();
     hist.hidden = !a.length;
@@ -596,6 +596,30 @@
       done.appendChild(openLink(out));
     }
     done.classList.remove('pop'); void done.offsetWidth; done.classList.add('pop');
+    if ((k === 'cut' || k === 'short') && out.includes('?')) recut(out);
+  }
+
+  // 꼬리가 남았으면 서버가 페이지의 대표 주소를 읽어 한 번 더 자름(말 없이 기다렸다가, 더 줄었을 때만 안내)
+  async function recut(out) {
+    try {
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 5000);
+      const res = await fetch('/api/recut?u=' + encodeURIComponent(out), { signal: ctl.signal });
+      clearTimeout(timer);
+      const j = await res.json();
+      if (!j.url || j.url.length >= out.length || result.textContent !== out) return;
+      result.textContent = j.url;
+      addHist(j.url, out);
+      lastDone = { k: 'cut', out: j.url, retried: true };
+      paintDone();
+      try { await navigator.clipboard.writeText(j.url); }
+      catch (e) {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = t('copy');
+        btn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(j.url); btn.textContent = t('copied'); } catch (_) { btn.textContent = t('longpress'); } });
+        done.append(' ', btn);
+      }
+      done.classList.remove('pop'); void done.offsetWidth; done.classList.add('pop');
+    } catch (e) {}
   }
 
   // 공유: 허브 공통 공유 창
