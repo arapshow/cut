@@ -67,13 +67,13 @@
 
   /* 입력칸: 폰에서도 한 화면에 들어오도록 낮게 */
   textarea {
-    width: 100%; max-width: 720px; height: 110px; padding: 14px 16px;
+    width: 100%; max-width: 720px; height: 80px; padding: 12px 16px;
     font: inherit; font-size: 16px; color: var(--fg); background: var(--field, transparent);
     border: 2px solid var(--line); border-radius: 14px; resize: none;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
   textarea:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 18%, transparent); }
-  @media (min-width: 640px) { textarea { height: 140px; } }
+  @media (min-width: 640px) { textarea { height: 96px; } }
 
   #result {
     width: 100%; max-width: 720px; margin-top: 12px; min-height: 0;
@@ -110,6 +110,21 @@
     font: inherit; font-size: 13px; font-weight: 700; color: #fff; background: var(--acc);
     border: 0; border-radius: 999px; padding: 6px 16px; cursor: pointer;
   }
+
+  /* 최근 자른 주소: 이 브라우저에만 3개 남김(서버로 안 보냄). 누르면 다시 복사 */
+  .hist { width: 100%; max-width: 720px; margin-top: 18px; font-size: 13px; color: var(--mut); }
+  .hist[hidden] { display: none; }
+  .hist-head { display: flex; justify-content: center; gap: 10px; margin-bottom: 6px; }
+  .hist-head button { all: unset; cursor: pointer; font-size: 12px; opacity: .7; text-decoration: underline; text-underline-offset: 3px; }
+  .hist ul { list-style: none; margin: 0; padding: 0; }
+  .hist li button {
+    all: unset; box-sizing: border-box; display: flex; gap: 8px; align-items: center; width: 100%; cursor: pointer;
+    padding: 7px 12px; border-radius: 10px; color: var(--fg);
+  }
+  .hist li button:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+  .hist .u { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist .c { flex: none; font-size: 12px; color: var(--mut); }
+  .hist .ok .c { color: var(--acc); font-weight: 700; }
 
   /* 이게 뭔데? — 얇은 카드 하나로 정리 */
   .about { width: 100%; max-width: 720px; margin-top: 48px; font-size: 14px; color: var(--mut); }
@@ -204,7 +219,7 @@
     .logo-line { margin-top: 8px; }
     .logo-url { margin-top: 4px; }
     h1 { margin-bottom: 14px; }
-    textarea { height: 84px; }
+    textarea { height: 64px; }
     .about { margin-top: 26px; }
     .about summary { padding: 4px; }
     .about-body { font-size: 13px; line-height: 1.6; padding: 12px 14px; }
@@ -238,6 +253,11 @@
 <div id="before"></div>
 <div id="result"></div>
 <div id="done" aria-live="polite"></div>
+
+<section class="hist" id="hist" hidden>
+  <div class="hist-head"><span data-i18n="hist">최근 자른 주소</span><button type="button" id="hist-clear" data-i18n="clear">지우기</button></div>
+  <ul id="hist-list"></ul>
+</section>
 
 <details class="about">
   <summary data-i18n="sum">이게 뭔데?</summary>
@@ -285,6 +305,7 @@
       none: '주소가 안 보이네요. 주소 전체를 다시 붙여넣어 보세요.',
       ok: ['깨끗한 주소, 이미 복사완료. 어디든 붙여넣거나, ', '새창으로 여세요', '.'],
       login: '로그인 페이지네요. 도메인만 복사했어요.', finance: '금융관련 페이지네요. 도메인만 복사했어요.', auth: '인증 링크네요. 도메인만 복사했어요.',
+      hist: '최근 자른 주소', clear: '지우기', again: '다시 복사',
       copy: '복사하기', copied: '복사됐어요', longpress: '주소를 길게 눌러 복사하세요'
     },
     en: {
@@ -301,6 +322,7 @@
       none: 'I can\'t see a link. Paste the whole link again.',
       ok: ['Clean link, already copied. Paste it anywhere, or ', 'open it in a new window', '.'],
       login: 'Looks like a login page. Copied the domain only.', finance: 'Looks like a finance page. Copied the domain only.', auth: 'Looks like a verification link. Copied the domain only.',
+      hist: 'Recently cut', clear: 'Clear', again: 'Copy again',
       copy: 'Copy', copied: 'Copied', longpress: 'Long-press the link to copy'
     },
     ja: {
@@ -317,6 +339,7 @@
       none: 'URLが見えません。URL全体をもう一度貼ってみてください。',
       ok: ['きれいなURLはもうコピーしました。どこでも貼るか、', '新しいウィンドウで開いてください', '。'],
       login: 'ログインページですね。ドメインだけコピーしました。', finance: '金融関連ページですね。ドメインだけコピーしました。', auth: '認証リンクですね。ドメインだけコピーしました。',
+      hist: '最近切ったURL', clear: '消去', again: 'もう一度コピー',
       copy: 'コピー', copied: 'コピーしました', longpress: 'URLを長押ししてコピーしてください'
     }
   };
@@ -334,6 +357,7 @@
     document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
     if (typeof fitPlaceholder === 'function') fitPlaceholder();
     paintDone();
+    if (histOn) paintHist();
   }
 
   // 떼어낼 추적 꼬리: 어느 사이트든 지우는 것
@@ -508,6 +532,31 @@
     done.append(a, tail);
   }
 
+  // 최근 자른 주소: 이 브라우저(localStorage 'cuthist')에만 3개. 복사가 풀려도 다시 누르면 복사
+  const HIST_KEY = 'cuthist', HIST_MAX = 3;
+  const hist = document.getElementById('hist'), histList = document.getElementById('hist-list');
+  function loadHist() { try { const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); return Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, HIST_MAX) : []; } catch (e) { return []; } }
+  function saveHist(a) { try { localStorage.setItem(HIST_KEY, JSON.stringify(a)); } catch (e) {} }
+  function addHist(url) { saveHist([url, ...loadHist().filter(x => x !== url)].slice(0, HIST_MAX)); paintHist(); }
+  function paintHist() {
+    const a = loadHist();
+    hist.hidden = !a.length;
+    histList.textContent = '';
+    a.forEach(url => {
+      const li = document.createElement('li'), b = document.createElement('button'), u = document.createElement('span'), c = document.createElement('span');
+      b.type = 'button'; u.className = 'u'; u.textContent = url; c.className = 'c'; c.textContent = t('again');
+      b.append(u, c); li.append(b); histList.append(li);
+      b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(url); c.textContent = t('copied'); }
+        catch (e) { c.textContent = t('longpress'); }
+        b.classList.add('ok');
+        setTimeout(() => { b.classList.remove('ok'); c.textContent = t('again'); }, 1600);
+      });
+    });
+  }
+  document.getElementById('hist-clear').addEventListener('click', () => { saveHist([]); try { localStorage.removeItem(HIST_KEY); } catch (e) {} paintHist(); });
+  var histOn = true; paintHist();
+
   async function handle(text) {
     const k = kind(text);
     let out = clean(text);
@@ -521,6 +570,7 @@
       return;
     }
     result.textContent = out;
+    addHist(out);
     result.classList.remove('show'); void result.offsetWidth; result.classList.add('show');
     try {
       await navigator.clipboard.writeText(out);
